@@ -1,6 +1,11 @@
-import React from 'react'
+import React, { FC } from 'react'
+import { TodoType } from '../types'
 
-const Todo = () => {
+type Props = {
+  todo: TodoType
+}
+
+const Todo:FC<Props> = ({ todo }) => {
   return (
     <div>
       <li className="py-4">
@@ -14,7 +19,7 @@ const Todo = () => {
                   border-gray-300 rounded"
             />
             <label className="ml-3 block text-gray-900">
-              <span className="text-lg font-medium mr-2"> 散歩 </span>
+              <span className="text-lg font-medium mr-2">{todo.title}</span>
             </label>
           </div>
           <div className="flex items-center space-x-2">
