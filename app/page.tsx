@@ -4,6 +4,7 @@ import Todo from "./components/Todo";
 import useSWR from "swr";
 import { TodoType } from "./types";
 import { FormEvent, useRef } from "react";
+import axios from "axios";
 
 async function fetcher(key: string) {
   return fetch(key).then((res) => res.json());
@@ -11,11 +12,17 @@ async function fetcher(key: string) {
 
 export default function Home() {
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const { data, isLoading, error } = useSWR("http://localhost/api/todos", fetcher);
+  const { data, isLoading, error, mutate } = useSWR("http://localhost/api/todos", fetcher);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
+    const response = await axios.post("http://localhost/api/todos", {title: inputRef.current?.value, completed: false});
+    if (response.statusText === "OK") {
+      const newTodo = response.data;
+      mutate([...data, newTodo]);
+      inputRef.current!.value = "";
+    }
   }
 
   return (
