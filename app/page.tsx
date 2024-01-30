@@ -1,7 +1,15 @@
-import Todo from "./componets/Todo";
+'use client';
+
+import Todo from "./components/Todo";
+import useSWR from "swr";
+
+async function fetcher(key: string) {
+  return fetch(key).then((res) => res.json());
+}
 
 export default function Home() {
-  
+  const { data, isLoading, error } = useSWR("http://localhost/api/todos", fetcher);
+  console.log(data);
 
   return (
     <div
