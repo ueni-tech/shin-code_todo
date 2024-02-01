@@ -18,12 +18,21 @@ const Todo: FC<Props> = ({ todo }) => {
     setIsEditing(prev => !prev);
     if (isEditing) {
       const response = await axios.put(`http://localhost/api/todos/${todo.id}`, { title: editedTitle });
-      console.log(response);
 
       if (response.status === 200) {
-        const editedTodo = response.data;
-        mutate([...todos, editedTodo]);
+        const editedTodo = await response.data;
+        const updatedTodos = todos.map((todo: TodoType) => todo.id === editedTodo.id ? editedTodo : todo);
+        mutate(updatedTodos);
       }
+    }
+  }
+
+  const handleDelete = async () => {
+    const response = await axios.delete(`http://localhost/api/todos/${todo.id}`);
+    if (response.status === 200) {
+      const deletedTodo = await response.data;
+      const updatedTodos = todos.filter((todo: TodoType) => todo.id !== deletedTodo.id);
+      mutate(updatedTodos);
     }
   }
 
@@ -56,6 +65,7 @@ const Todo: FC<Props> = ({ todo }) => {
             </button>
             <button
               className="bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-2 rounded"
+              onClick={handleDelete}
             >
               ✖
             </button>
