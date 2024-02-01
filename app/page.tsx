@@ -5,22 +5,19 @@ import useSWR from "swr";
 import { TodoType } from "./types";
 import { FormEvent, useRef } from "react";
 import axios from "axios";
-
-async function fetcher(key: string) {
-  return fetch(key).then((res) => res.json());
-}
+import { useTodos } from "./hooks/useTodos";
 
 export default function Home() {
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const { data, isLoading, error, mutate } = useSWR("http://localhost/api/todos", fetcher);
+  const {todos, isLoading, error, mutate } = useTodos();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     const response = await axios.post("http://localhost/api/todos", {title: inputRef.current?.value, completed: false});
-    if (response.statusText === "OK") {
+    if (response.status === 201) {
       const newTodo = response.data;
-      mutate([...data, newTodo]);
+      mutate([...todos, newTodo]);
       inputRef.current!.value = "";
     }
   }
@@ -51,7 +48,7 @@ export default function Home() {
         </div>
       </form>
       <ul className="divide-y divide-gray-200 px-4">
-        {data?.map( (todo: TodoType) =>(
+        {todos?.map( (todo: TodoType) =>(
           <Todo key={todo.id} todo={todo} />
         ))}
       </ul>

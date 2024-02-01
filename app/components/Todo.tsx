@@ -1,11 +1,32 @@
-import React, { FC } from 'react'
+import React, { FC, useState } from 'react'
 import { TodoType } from '../types'
+import axios from 'axios'
+import useSWR from 'swr'
+import { useTodos } from '../hooks/useTodos'
 
 type Props = {
   todo: TodoType
 }
 
-const Todo:FC<Props> = ({ todo }) => {
+const Todo: FC<Props> = ({ todo }) => {
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedTitle, setEditedTitle] = useState(todo.title);
+  const { todos, isLoading, error, mutate } = useTodos();
+
+  const handleEdit = async () => {
+    setIsEditing(prev => !prev);
+    if (isEditing) {
+      const response = await axios.put(`http://localhost/api/todos/${todo.id}`, { title: editedTitle });
+      console.log(response);
+
+      if (response.status === 200) {
+        const editedTodo = response.data;
+        mutate([...todos, editedTodo]);
+      }
+    }
+  }
+
   return (
     <div>
       <li className="py-4">
@@ -19,14 +40,19 @@ const Todo:FC<Props> = ({ todo }) => {
                   border-gray-300 rounded"
             />
             <label className="ml-3 block text-gray-900">
-              <span className="text-lg font-medium mr-2">{todo.title}</span>
+              {isEditing ? (
+                <input type="text" className='border rounded py-1 px-2' value={editedTitle} onChange={(e) => setEditedTitle(e.target.value)} />
+              ) : (
+                <span className="text-lg font-medium mr-2">{todo.title}</span>
+              )}
             </label>
           </div>
           <div className="flex items-center space-x-2">
             <button
+              onClick={handleEdit}
               className="duration-150 bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-2 rounded"
             >
-              ✒
+              {isEditing ? "save" : "✒"}
             </button>
             <button
               className="bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-2 rounded"
